@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <link href="./bootstrap.min.css" rel="stylesheet" />
+  <script src="./jquery-3.4.1.min.js"></script>
+  <!--<script src="./showdown.min.js"></script>-->
+
+
+
+
+</head>
+
+<body>
+  <nav class="navbar navbar-light bg-light">
+    <a class="navbar-brand" href="#">
+      <img src="captcha.png" width="200" height="32" alt="" style="margin-right:50px;" />
+      Test my Server
+    </a>
+    <a href="client/swagger">
+      <img src="swagger.svg" width="32" height="32" alt="" />
+      Swagger
+    </a>
+    <a href="shutdown">
+      <img src="poweroff.png" width="24" height="24" alt="" />
+      Shutdown
+    </a>
+    <div class="form-inline my-2 my-lg-0">
+      <input id="local" class="form-control mr-sm-2" type="search" placeholder="Server url:" aria-label="Search" />
+    </div>
+  </nav>
+
+  <p />
+
+  <div class="container card-columns" id="testsDiv">    
+  </div>
+
+  <!-- 
+  <div id="md">
+  here
+  <script>
+  
+  $.ajax({
+  	url: "https://raw.githubusercontent.com/geleouet/exercices/master/OptServer/README.md"
+  ,
+  success: function(result) {
+  	var converter = new showdown.Converter(),
+    text      = result,
+    html      = converter.makeHtml(text);
+    $("#md").html(html)
+  
+  }})
+  </script>
+  </div>
+-->
+</body>
+<script>
+
+  $.ajax({
+      url: "/cards",
+      
+      success: function (result) {
+        htmlCard = ''
+        for (r of result) {
+          htmlCard += '<div class="card" style="width: 18rem;"><div class="card-body"><h5 class="card-title">'+
+          r.title +
+          '</h5><button onclick="exec(this)" exo="'+
+          r.url +
+          '" class="simple btn btn-primary">Run</button></div></div>'
+        }
+        $("#testsDiv").html(htmlCard)
+      }
+    });
+
+  function exec(exo) {
+    urltext = exo.attributes['exo'].value
+    console.log(urltext)
+    $(exo).html("<img src='loading-lazy.gif' width =32 height=32 >" + "" + "</img>");
+    $(exo).removeClass("btn-primary")
+    $(exo).removeClass("btn-danger")
+    $(exo).addClass("btn-light")
+    $(exo).attr("disabled", true);
+
+    var url = $("#local")[0].value
+    $.ajax({
+      url: "/api/" + urltext,
+      data: {
+        "url": url
+      },
+      success: function (result) {
+        if (result.status) {
+          $(exo).html("<strong>" + "OK" + "</strong>");
+          $(exo).removeClass("btn-primary")
+          $(exo).removeClass("btn-danger")
+          $(exo).removeClass("btn-light")
+          $(exo).removeClass("btn-warning")
+          $(exo).addClass("btn-success")
+          $(exo).removeAttr("disabled");
+        }
+        else {
+          $(exo).html("<strong>" + result.reason + "</strong>");
+          $(exo).removeClass("btn-primary")
+          $(exo).removeClass("btn-danger")
+          $(exo).removeClass("btn-light")
+          $(exo).removeClass("btn-warning")
+          $(exo).addClass("btn-warning")
+          $(exo).removeAttr("disabled");
+        }
+
+      },
+      error: function () {
+        $(exo).html("<strong>KO</strong>");
+        $(exo).removeClass("btn-primary")
+        $(exo).removeClass("btn-success")
+        $(exo).removeClass("btn-light")
+        $(exo).removeClass("btn-warning")
+        $(exo).addClass("btn-danger")
+        $(exo).removeAttr("disabled");
+      }
+    });
+  };
+</script>
+
+</html>
